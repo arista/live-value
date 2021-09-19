@@ -6,12 +6,14 @@ export class AssignedValue<T> extends Value<T> {
     super(liveValue)
   }
 
-  getValue():T {
+  getValue() {
     return this._value
   }
 
   setValue(value:T) {
-    this._value = value
-    this.liveValue.notifyListeners()
+    if (value !== this._value) {
+      this._value = value
+      this.liveValue.notifyListeners()
+    }
   }
 }
