@@ -43,7 +43,7 @@ Here there are two `LiveValue` objects whose values are incrementing at varying 
 
 When a function is passed to a `LiveValue`, that function is not evaluated until the first time the `value` property is accessed.  Its result is cached and returned with subsequent `value` calls until one of the dependencies changes, at which point that cached value is removed.  After that, the function is not re-evaluated until the next time `value` is accessed.
 
-`LiveValue` provides a simple API that allows applications to be notified when a value may have changed, either because the `value` was set directly, or because a dependency's value changed, effectively offering applications the same ability given to the `useLiveValue` hook:
+`LiveValue` provides a simple API that allows applications to be notified when a value may have changed, either because the `value` was set directly, or because a dependency's value changed.  This effectively offers applications the same ability given to the `useLiveValue` hook:
 
 ```
 addListener(listener: ()=>void)
