@@ -4,6 +4,7 @@ import {Value} from "./Value"
 import {AssignedValue} from "./AssignedValue"
 import {ComputedValue} from "./ComputedValue"
 import {UnassignedValue} from "./UnassignedValue"
+import {DependencyTracker} from "./DependencyTracker"
 
 export class LiveValue<T> {
   listeners = new Listeners()
@@ -11,7 +12,7 @@ export class LiveValue<T> {
 
   constructor(value: Initializer<T>) {
     if (typeof(value) === "function") {
-      throw new Error(`ComputedValue not supported`)
+      this._value = new ComputedValue(this, value as any)
     }
     else {
       this._value = new AssignedValue(this, value)
@@ -31,7 +32,9 @@ export class LiveValue<T> {
   }
 
   get value():T {
-    return this._value.getValue()
+    const ret = this._value.getValue()
+    DependencyTracker.addDependency(this)
+    return ret
   }
 
   set value(value: T) {
