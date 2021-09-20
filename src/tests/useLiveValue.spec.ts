@@ -109,7 +109,9 @@ describe("useLiveValue", () => {
       expect(listenerCount(lv2)).toBe(1)
       expect(firstListener(lv2)).toBe(l1)
 
-      expect(result.result.all).toEqual([10, 50])
+      // See useOrCreateLiveValue for why this ends up being two
+      // re-renders
+      expect(result.result.all).toEqual([10, 50, 50])
       expect(result.result.current).toBe(50)
     })
   })

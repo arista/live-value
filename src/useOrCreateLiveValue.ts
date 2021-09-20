@@ -1,5 +1,4 @@
-//import {useState} from "react"
-import {useMemo} from "react"
+import {useState} from "react"
 import {LiveValue} from "./LiveValue"
 
 export type useOrCreateLiveValueProps<T> =
@@ -17,37 +16,24 @@ function toLiveValue<T>(liveValue:useOrCreateLiveValueProps<T>):LiveValue<T> {
 
 // Returns either the passed-in LiveValue, or a LiveValue created
 // around the passed-in function.  The same created LiveValue will
-// always be returned if the same function is passed in.
+// always be returned if the same function or LiveValue is passed in.
+//
+// If a new LiveValue or function is passed in, then a double-rerender
+// may occur, since the update function of setState is used to 
 export function useOrCreateLiveValue<T>(props:useOrCreateLiveValueProps<T>):LiveValue<T> {
-  /*
-  const state = useState((prevState:State<T>)=>{
-    console.log(`prevState`, prevState)
-    if (prevState == null) {
-      return {
-        props,
-        liveValue: toLiveValue(props)
-      }
-    }
-    else if(prevState.props === props) {
-      return prevState
-    }
-    else {
-      prevState.liveValue.disconnectDependencies()
-      return {
-        props,
-        liveValue: toLiveValue(props)
-      }
-    }
-  })[0]
-  return state.liveValue
-  */
+  // Put props into an Array, since props could be a function which
+  // will confuse useState
+  const [prevProps, setPrevProps] = useState([props])
+  const [liveValue, setLiveValue] = useState(()=>toLiveValue(props))
 
-  return useMemo(()=>{
-    if (typeof(props) === "function") {
-      return new LiveValue(props)
-    }
-    else {
-      return props
-    }
-  }, [props])
+  if (prevProps[0] !== props) {
+    liveValue.disconnectDependencies()
+    const newLiveValue = toLiveValue(props)
+    setLiveValue(newLiveValue)
+    setPrevProps([props])
+    return newLiveValue
+  }
+  else {
+    return liveValue
+  }
 }

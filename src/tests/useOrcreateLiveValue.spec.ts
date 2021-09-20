@@ -43,7 +43,8 @@ describe("useOrCreateLiveValue", () => {
 
       // Rerender
       result.rerender(lv2)
-      expect(result.result.all.length).toBe(2)
+      // See useOrCreateLiveValue for why this ends up being a double-rerender
+      expect(result.result.all.length).toBe(3)
       expect(result.result.current).toBe(lv2)
     })
     it("should return a different LiveValue if later called with a function", ()=>{
@@ -57,7 +58,8 @@ describe("useOrCreateLiveValue", () => {
       // Rerender
       const f = ()=>lv1.value * 2
       result.rerender(f as any)
-      expect(result.result.all.length).toBe(2)
+      // See useOrCreateLiveValue for why this ends up being a double-rerender
+      expect(result.result.all.length).toBe(3)
       const lv2 = result.result.current
       expect(lv2.value).toBe(20)
       expect(lv2).not.toBe(lv1)
@@ -98,7 +100,8 @@ describe("useOrCreateLiveValue", () => {
       // Re-render with new value
       const f2 = ()=>lv1.value * 3
       result.rerender(f2)
-      expect(result.result.all.length).toBe(2)
+      // See useOrCreateLiveValue for why this ends up being a double-rerender
+      expect(result.result.all.length).toBe(3)
       const lv3 = result.result.current
       expect(lv3).not.toBe(lv2)
       expect(lv3.value).toBe(30)
@@ -122,7 +125,8 @@ describe("useOrCreateLiveValue", () => {
 
       const lv3 = new LiveValue(30)
       result.rerender(lv3 as any)
-      expect(result.result.all.length).toBe(2)
+      // See useOrCreateLiveValue for why this ends up being a double-rerender
+      expect(result.result.all.length).toBe(3)
       expect(result.result.current).toBe(lv3)
       expect(lv3.value).toBe(30)
 
