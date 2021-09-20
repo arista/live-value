@@ -63,6 +63,13 @@ describe("useLiveValue", () => {
       })
       expect(result.result.all.length).toBe(2)
       expect(result.result.current).toBe(11)
+
+      act(()=>{
+        lv1.value = 12
+        lv1.value = 13
+      })
+      expect(result.result.all.length).toBe(3)
+      expect(result.result.current).toBe(13)
     })
     it("should not change the listener list when rerendered", ()=>{
       const lv1 = new LiveValue(10)
