@@ -3,20 +3,18 @@ import {LiveValue} from "./LiveValue"
 import {useEffect} from "react"
 import {useOrCreateLiveValue} from "./useOrCreateLiveValue"
 
-export type useLiveValueProps<T> =
-  LiveValue<T> |
-  (()=>T)
+export type useLiveValueProps<T> = LiveValue<T> | (() => T)
 
-export function useLiveValue<T>(props:useLiveValueProps<T>):T {
+export function useLiveValue<T>(props: useLiveValueProps<T>): T {
   const listenerFunc = useForceRerender()
   const liveValue = useOrCreateLiveValue(props)
 
-  useEffect(()=>{
+  useEffect(() => {
     liveValue.addListener(listenerFunc)
-    return ()=>{
+    return () => {
       liveValue.removeListener(listenerFunc)
     }
   }, [liveValue])
-  
+
   return liveValue.value
 }

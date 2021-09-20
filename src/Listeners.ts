@@ -1,14 +1,12 @@
 export class Listeners {
-  listeners: Array<Listener>|null = null
+  listeners: Array<Listener> | null = null
 
-  constructor() {
-  }
+  constructor() {}
 
-  add(listener:Listener) {
+  add(listener: Listener) {
     if (this.listeners == null) {
       this.listeners = [listener]
-    }
-    else {
+    } else {
       const ix = this.listeners.indexOf(listener)
       if (ix < 0) {
         this.listeners.push(listener)
@@ -16,7 +14,7 @@ export class Listeners {
     }
   }
 
-  remove(listener:Listener) {
+  remove(listener: Listener) {
     if (this.listeners != null) {
       const ix = this.listeners.indexOf(listener)
       if (ix >= 0) {
@@ -28,11 +26,11 @@ export class Listeners {
   notify() {
     if (this.listeners != null && this.listeners.length > 0) {
       const listeners = [...this.listeners]
-      for(const listener of listeners) {
+      for (const listener of listeners) {
         listener()
       }
     }
   }
 }
 
-export type Listener = ()=>void
+export type Listener = () => void

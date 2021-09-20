@@ -10,9 +10,9 @@ export function useForceRerender() {
   // that the rerender function itself doesn't change, we put that in
   // its own useState.  The function itself is buried in an anonymous
   // function to avoid re-creating it on every re-render.
-  const [rerender] = useState(()=>{
+  const [rerender] = useState(() => {
     let count = 1
-    return ()=>{
+    return () => {
       setCount(count++)
     }
   })

@@ -2,7 +2,7 @@ import {Value} from "./Value"
 import {LiveValue} from "./LiveValue"
 
 export class AssignedValue<T> extends Value<T> {
-  constructor(liveValue:LiveValue<T>, public _value:T) {
+  constructor(liveValue: LiveValue<T>, public _value: T) {
     super(liveValue)
   }
 
@@ -10,7 +10,7 @@ export class AssignedValue<T> extends Value<T> {
     return this._value
   }
 
-  setValue(value:T) {
+  setValue(value: T) {
     if (value !== this._value) {
       this._value = value
       this.liveValue.notifyListeners()
@@ -21,6 +21,5 @@ export class AssignedValue<T> extends Value<T> {
     return true
   }
 
-  disconnectDependencies() {
-  }
+  disconnectDependencies() {}
 }

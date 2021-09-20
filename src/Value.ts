@@ -1,11 +1,10 @@
 import {LiveValue} from "./LiveValue"
 
 export abstract class Value<T> {
-  constructor(public liveValue:LiveValue<T>) {
-  }
+  constructor(public liveValue: LiveValue<T>) {}
 
-  abstract getValue():T
-  abstract setValue(value:T):void
-  abstract get canSetValue():boolean
-  abstract disconnectDependencies():void
+  abstract getValue(): T
+  abstract setValue(value: T): void
+  abstract get canSetValue(): boolean
+  abstract disconnectDependencies(): void
 }

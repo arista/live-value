@@ -4,24 +4,24 @@ import {DependencyTracker} from "./DependencyTracker"
 
 export class ComputedValue<T> extends Value<T> {
   valid = false
-  computedValue:T|null = null
-  dependencies:Array<LiveValue<any>> = []
-  dependencyListener = ()=>this.onDependencyNotify()
+  computedValue: T | null = null
+  dependencies: Array<LiveValue<any>> = []
+  dependencyListener = () => this.onDependencyNotify()
 
-  constructor(liveValue:LiveValue<T>, public f: ()=>T) {
+  constructor(liveValue: LiveValue<T>, public f: () => T) {
     super(liveValue)
   }
 
-  getValue():T {
+  getValue(): T {
     if (!this.valid) {
       this.computedValue = DependencyTracker.withDependent(this, this.f)
       this.valid = true
     }
     // Can't rule out being null, since that might be part of type T
-    return (this.computedValue as any)
+    return this.computedValue as any
   }
 
-  setValue(value:T) {
+  setValue(value: T) {
     throw new Error(`Not implemented`)
   }
 
@@ -38,7 +38,7 @@ export class ComputedValue<T> extends Value<T> {
 
   disconnectDependencies() {
     // Remove listener from all dependencies
-    for(const dependency of this.dependencies) {
+    for (const dependency of this.dependencies) {
       dependency.removeListener(this.dependencyListener)
     }
 
@@ -46,7 +46,7 @@ export class ComputedValue<T> extends Value<T> {
     this.dependencies = []
   }
 
-  addDependency(liveValue:LiveValue<any>) {
+  addDependency(liveValue: LiveValue<any>) {
     if (this.dependencies.indexOf(liveValue) < 0) {
       this.dependencies.push(liveValue)
       liveValue.addListener(this.dependencyListener)

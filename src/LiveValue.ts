@@ -7,25 +7,23 @@ import {DependencyTracker} from "./DependencyTracker"
 
 export class LiveValue<T> {
   listeners = new Listeners()
-  _value: Value<T>|null = null
+  _value: Value<T> | null = null
 
-  constructor(value: Initializer<T>|_NoValue = NoValue) {
+  constructor(value: Initializer<T> | _NoValue = NoValue) {
     if (value instanceof _NoValue) {
       this._value = null
-    }
-    else if (typeof(value) === "function") {
+    } else if (typeof value === "function") {
       this._value = new ComputedValue(this, value as any)
-    }
-    else {
+    } else {
       this._value = new AssignedValue(this, value)
     }
   }
 
-  addListener(listener:Listener) {
+  addListener(listener: Listener) {
     this.listeners.add(listener)
   }
 
-  removeListener(listener:Listener) {
+  removeListener(listener: Listener) {
     this.listeners.remove(listener)
   }
 
@@ -33,9 +31,11 @@ export class LiveValue<T> {
     this.listeners.notify()
   }
 
-  get value():T {
+  get value(): T {
     if (this._value == null) {
-      throw new Error(`LiveValue has not yet been assigned a value or a function`)
+      throw new Error(
+        `LiveValue has not yet been assigned a value or a function`
+      )
     }
     const ret = this._value.getValue()
     DependencyTracker.addDependency(this)
@@ -46,11 +46,9 @@ export class LiveValue<T> {
     if (this._value == null) {
       this._value = new AssignedValue(this, value)
       this.notifyListeners()
-    }
-    else if (this._value.canSetValue) {
+    } else if (this._value.canSetValue) {
       this._value.setValue(value)
-    }
-    else {
+    } else {
       this.disconnectDependencies()
       this._value = new AssignedValue(this, value)
       this.notifyListeners()
@@ -74,8 +72,8 @@ export class LiveValue<T> {
   }
 }
 
-export type NotFunction<T> = T extends Function ? never : T;
-export type ValueFunc<T> = ()=>T
+export type NotFunction<T> = T extends Function ? never : T
+export type ValueFunc<T> = () => T
 export type Initializer<T> = NotFunction<T> | ValueFunc<T>
 
 class _NoValue {}
