@@ -214,8 +214,69 @@ describe("LiveValue", ()=>{
       expect(lv3count).toBe(2)
       expect(lv4count).toBe(2)
     })
+    it("should throw if it references itself", ()=>{
+      const lv1 = new LiveValue(():number=>lv1.value + 1)
+      expect(()=>lv1.value).toThrow(new Error(`Computed LiveValue directly or indirectly references itself`))
+    })
+    it("should throw if it references itself indirectly", ()=>{
+      const lv1 = new LiveValue(():number=>lv2.value + 1)
+      const lv2 = new LiveValue(():number=>lv3.value + 1)
+      const lv3 = new LiveValue(():number=>lv1.value + 1)
+      expect(()=>lv1.value).toThrow(new Error(`Computed LiveValue directly or indirectly references itself`))
+    })
+  })
+  describe("with no initial value", ()=>{
+    it("should throw when accessed", ()=>{
+      const lv1 = new LiveValue<number>()
+      expect(()=>lv1.value).toThrow(new Error(`LiveValue has not yet been assigned a value or a function`))
+    })
+    it("should allow an assigned value to be set", ()=>{
+      const lv1 = new LiveValue<number>()
+      lv1.value = 10
+      expect(lv1.value).toBe(10)
+    })
   })
   describe("assigning function and non-function values", ()=>{
-    // FIXME - implement this
+    it("should allow a computed LiveValue to later be assigned a static value", ()=>{
+      let lv1count = 0
+      const lv1 = new LiveValue(()=>{
+        lv1count++
+        return lv2.value * 2
+      })
+      const lv2 = new LiveValue(10)
+
+      let lv3count = 0
+      const lv3 = new LiveValue(()=>{
+        lv3count++
+        return lv1.value * 3
+      })
+        
+      expect(lv1.value).toBe(20)
+      expect(lv1count).toBe(1)
+      expect(lv3.value).toBe(60)
+      expect(lv3count).toBe(1)
+
+      lv2.value++
+      expect(lv1.value).toBe(22)
+      expect(lv1count).toBe(2)
+      expect(lv3.value).toBe(66)
+      expect(lv3count).toBe(2)
+
+      lv1.value = 5
+      expect(lv1.value).toBe(5)
+      expect(lv1count).toBe(2)
+      expect(lv3.value).toBe(15)
+      expect(lv3count).toBe(3)
+
+      lv2.value++
+      expect(lv1.value).toBe(5)
+      expect(lv1count).toBe(2)
+
+      lv1.value++
+      expect(lv1.value).toBe(6)
+      expect(lv1count).toBe(2)
+      expect(lv3.value).toBe(18)
+      expect(lv3count).toBe(4)
+    })
   })
 })

@@ -6,4 +6,6 @@ export abstract class Value<T> {
 
   abstract getValue():T
   abstract setValue(value:T):void
+  abstract get canSetValue():boolean
+  abstract disconnectDependencies():void
 }

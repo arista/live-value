@@ -29,18 +29,21 @@ export class ComputedValue<T> extends Value<T> {
     if (this.valid) {
       this.valid = false
       this.computedValue = null
-
-      // Remove listener from all dependencies
-      for(const dependency of this.dependencies) {
-        dependency.removeListener(this.dependencyListener)
-      }
-
-      // Clear out dependencies
-      this.dependencies = []
+      this.disconnectDependencies()
 
       // Notify listeners
       this.liveValue.notifyListeners()
     }
+  }
+
+  disconnectDependencies() {
+    // Remove listener from all dependencies
+    for(const dependency of this.dependencies) {
+      dependency.removeListener(this.dependencyListener)
+    }
+
+    // Clear out dependencies
+    this.dependencies = []
   }
 
   addDependency(liveValue:LiveValue<any>) {
@@ -48,5 +51,9 @@ export class ComputedValue<T> extends Value<T> {
       this.dependencies.push(liveValue)
       liveValue.addListener(this.dependencyListener)
     }
+  }
+
+  get canSetValue() {
+    return false
   }
 }

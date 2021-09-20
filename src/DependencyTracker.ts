@@ -7,9 +7,13 @@ class _DependencyTracker {
   stack:Array<ComputedValue<any>> = []
 
   withDependent<T>(dependent:ComputedValue<any>, f:()=>T):T {
+    // Check for circular dependency
+    if (this.stack.indexOf(dependent) >= 0) {
+      throw new Error(`Computed LiveValue directly or indirectly references itself`)
+    }
+
     this.stack.push(dependent)
     try {
-      // FIXME - check for circular
       return f()
     }
     finally {

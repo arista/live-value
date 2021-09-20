@@ -16,4 +16,11 @@ export class AssignedValue<T> extends Value<T> {
       this.liveValue.notifyListeners()
     }
   }
+
+  get canSetValue() {
+    return true
+  }
+
+  disconnectDependencies() {
+  }
 }
