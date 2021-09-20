@@ -37,6 +37,9 @@ export class ComputedValue<T> extends Value<T> {
 
       // Clear out dependencies
       this.dependencies = []
+
+      // Notify listeners
+      this.liveValue.notifyListeners()
     }
   }
 

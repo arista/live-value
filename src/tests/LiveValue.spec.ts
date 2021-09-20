@@ -70,7 +70,7 @@ describe("LiveValue", ()=>{
       expect(lv1.value).toBe(6)
       expect(lv1count).toBe(1)
     })
-    it("should not the function again if accessed after a dependent is changed", ()=>{
+    it("should call the function again if accessed after a dependent is changed", ()=>{
       let lv1count = 0
       const lv1 = new LiveValue(()=>{
         lv1count++
@@ -87,10 +87,133 @@ describe("LiveValue", ()=>{
       expect(lv1.value).toBe(16)
       expect(lv1count).toBe(2)
     })
-    // FIXME - two levels deep
-    // FIXME - with multiple dependencies
-    // FIXME - depending on the same thing multiple times
-    // FIXME - switching dependencies
+    it("should detect dependency changes two levels deep", ()=>{
+      let lv1count = 0
+      const lv1 = new LiveValue(()=>{
+        lv1count++
+        return lv2.value * 2
+      })
+
+      let lv2count = 0
+      const lv2 = new LiveValue(()=>{
+        lv2count++
+        return lv3.value + 1
+      })
+
+      const lv3 = new LiveValue(10)
+
+      expect(lv1.value).toBe(22)
+      expect(lv1count).toBe(1)
+      expect(lv2count).toBe(1)
+
+      lv3.value = 20
+      expect(lv1count).toBe(1)
+      expect(lv2count).toBe(1)
+
+      expect(lv1.value).toBe(42)
+      expect(lv1count).toBe(2)
+      expect(lv2count).toBe(2)
+    })
+    it("should detect changes in multiple dependencies", ()=>{
+      let lv1count = 0
+      const lv1 = new LiveValue(()=>{
+        lv1count++
+        return lv2.value + lv3.value
+      })
+
+      const lv2 = new LiveValue(10)
+      const lv3 = new LiveValue(20)
+
+      expect(lv1.value).toBe(30)
+      expect(lv1count).toBe(1)
+
+      lv2.value++
+      expect(lv1.value).toBe(31)
+      expect(lv1count).toBe(2)
+
+      lv3.value++
+      expect(lv1.value).toBe(32)
+      expect(lv1count).toBe(3)
+
+      lv2.value++
+      lv3.value++
+      expect(lv1.value).toBe(34)
+      expect(lv1count).toBe(4)
+    })
+    it("should handle using the same dependency multiple times", ()=>{
+      let lv1count = 0
+      const lv1 = new LiveValue(()=>{
+        lv1count++
+        return lv2.value + lv2.value
+      })
+
+      const lv2 = new LiveValue(10)
+
+      expect(lv1.value).toBe(20)
+      expect(lv1count).toBe(1)
+
+      lv2.value++
+      expect(lv1.value).toBe(22)
+      expect(lv1count).toBe(2)
+    })
+    it("should handle switching between dependencies", ()=>{
+      let lv1count = 0
+      const lv1 = new LiveValue(()=>{
+        lv1count++
+        return lv2.value ? lv3.value  : lv4.value
+      })
+
+      const lv2 = new LiveValue(true)
+
+      let lv3count = 0
+      const lv3 = new LiveValue(()=>{
+        lv3count++
+        return lv3a.value
+      })
+      const lv3a = new LiveValue(10)
+
+      let lv4count = 0
+      const lv4 = new LiveValue(()=>{
+        lv4count++
+        return lv4a.value
+      })
+      const lv4a = new LiveValue(20)
+
+      expect(lv1.value).toBe(10)
+      expect(lv1count).toBe(1)
+      expect(lv3count).toBe(1)
+      expect(lv4count).toBe(0)
+
+      lv3a.value++
+      expect(lv1.value).toBe(11)
+      expect(lv1count).toBe(2)
+      expect(lv3count).toBe(2)
+      expect(lv4count).toBe(0)
+
+      lv4a.value++
+      expect(lv1.value).toBe(11)
+      expect(lv1count).toBe(2)
+      expect(lv3count).toBe(2)
+      expect(lv4count).toBe(0)
+
+      lv2.value = false
+      expect(lv1.value).toBe(21)
+      expect(lv1count).toBe(3)
+      expect(lv3count).toBe(2)
+      expect(lv4count).toBe(1)
+
+      lv3a.value++
+      expect(lv1.value).toBe(21)
+      expect(lv1count).toBe(3)
+      expect(lv3count).toBe(2)
+      expect(lv4count).toBe(1)
+
+      lv4a.value++
+      expect(lv1.value).toBe(22)
+      expect(lv1count).toBe(4)
+      expect(lv3count).toBe(2)
+      expect(lv4count).toBe(2)
+    })
   })
   describe("assigning function and non-function values", ()=>{
     // FIXME - implement this
