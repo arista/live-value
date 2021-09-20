@@ -113,4 +113,48 @@ describe("useLiveValue", () => {
       expect(result.result.current).toBe(50)
     })
   })
+  describe("with a LiveValue that is computed", ()=>{
+    it("should rerender if the dependencies change", ()=>{
+      const lv1 = new LiveValue(()=>lv2.value * 2)
+      const lv2 = new LiveValue(20)
+
+      const result = renderHook((lv:LiveValue<number>)=>useLiveValue(lv), {initialProps: lv1})
+      expect(result.result.all.length).toBe(1)
+      expect(result.result.current).toBe(40)
+      act(()=>{
+        lv2.value++
+      })
+      expect(result.result.all.length).toBe(2)
+      expect(result.result.current).toBe(42)
+
+      act(()=>{
+        lv1.value = 5
+      })
+      expect(result.result.all.length).toBe(3)
+      expect(result.result.current).toBe(5)
+    })
+  })
+  describe("with a function", ()=>{
+    it("should use the value computed from the specified function", ()=>{
+      let fcount = 0
+      const f = ()=>{
+        fcount++
+        return 10
+      }
+
+      const result = renderHook((lv:(LiveValue<number>|(()=>number)))=>useLiveValue(lv), {initialProps: f})
+      expect(result.result.all.length).toBe(1)
+      expect(result.result.current).toBe(10)
+      expect(fcount).toBe(1)
+
+      // It shouldn't call the function again
+      result.rerender(f)
+      expect(result.result.all.length).toBe(2)
+      expect(result.result.current).toBe(10)
+      expect(fcount).toBe(1)
+      
+    })
+    it("should use the value computed from the specified function", ()=>{
+    })
+  })
 })

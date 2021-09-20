@@ -3,9 +3,7 @@ import {renderHook, act} from "@testing-library/react-hooks"
 
 describe("useForceRerender", () => {
   it("return a function that forces a re-render", ()=>{
-    const result = renderHook((props:number)=>{
-      return useForceRerender()
-    })
+    const result = renderHook(()=>useForceRerender())
     expect(result.result.all.length).toBe(1)
     const updateFunc = result.result.current
     expect(typeof(updateFunc)).toBe("function")
