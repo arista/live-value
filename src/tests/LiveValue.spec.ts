@@ -31,14 +31,6 @@ function setupOnMatch(timeoutMsec:number|null = null, assignValue:boolean = true
   return {lv, calls, errors}
 }
 
-/*
-function wait(msec:number):Promise<void> {
-  const p = new Promise(resolve=>setTimeout(resolve, msec))
-  jest.runAllTimers()
-  return p
-}
-*/
-
 describe("LiveValue", () => {
   describe("with a non-function value", () => {
     it("should return the value in a getter", () => {

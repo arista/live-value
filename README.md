@@ -48,9 +48,10 @@ When a function is passed to a `LiveValue`, that function is not evaluated until
 `LiveValue` provides a simple API that allows applications to be notified when a value may have changed, either because the `value` was set directly, or because a dependency's value changed.  This effectively offers applications the same ability given to the `useLiveValue` hook:
 
 ```
-addListener(listener: ()=>void)
+addListener(listener: ()=>void, name: string|null = null)
 removeListener(listener: ()=>void)
 ```
+The optional `name` passed to addListener is used for debugging, described below.
 
 `LiveValue` can also generate Promises that resolve the next time the `LiveValue`'s value changes, or matches a given test function.  These Promises can optionally be set to reject if a specified timeout elapses before the required condition is met.
 
@@ -65,3 +66,5 @@ Sample usage:
 const newValue = await liveValue.onChange()
 const matchingValue = await liveValue.onMatch(newVal=>newVal != null)
 ```
+
+### Debugging

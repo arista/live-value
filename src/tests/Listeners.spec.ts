@@ -3,7 +3,7 @@ import {Listeners} from "../Listeners"
 describe("Listeners", () => {
   describe("add", () => {
     it("should add the listener, which will be called on notify", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -15,7 +15,7 @@ describe("Listeners", () => {
       expect(l1val).toBe(1)
     })
     it("should not add the listener more than once", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -28,7 +28,7 @@ describe("Listeners", () => {
       expect(l1val).toBe(1)
     })
     it("should allow multiple listeners to be added", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -46,7 +46,7 @@ describe("Listeners", () => {
       expect(l2val).toBe(-1)
     })
     it("retain listeners across multiple notify calls", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -70,14 +70,14 @@ describe("Listeners", () => {
   })
   describe("remove", () => {
     it("should not fail if removing a listener that was not added", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
       let l1val = 0
       const l1 = () => l1val++
 
       l.remove(l1)
     })
     it("should not notify a listener that was removed", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
       let l1val = 0
       const l1 = () => l1val++
 
@@ -90,7 +90,7 @@ describe("Listeners", () => {
       expect(l1val).toBe(1)
     })
     it("should remove one listener from among multiple", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -115,11 +115,11 @@ describe("Listeners", () => {
   })
   describe("notify", () => {
     it("should not fail if there are no listeners", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
       l.notify()
     })
     it("should call all of the added listeners", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => l1val++
@@ -137,7 +137,7 @@ describe("Listeners", () => {
       expect(l2val).toBe(-1)
     })
     it("should call the listeners in place at the time of the call, even if the list is notified later", () => {
-      const l = new Listeners()
+      const l = new Listeners("name")
 
       let l1val = 0
       const l1 = () => {

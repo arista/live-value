@@ -4,12 +4,23 @@ import {Value} from "./Value"
 import {AssignedValue} from "./AssignedValue"
 import {ComputedValue} from "./ComputedValue"
 import {DependencyTracker} from "./DependencyTracker"
+import {LiveValueDebug} from "./LiveValueDebug"
+import {NameInit, nameInitToName} from "./NameInit"
 
 export class LiveValue<T> {
-  listeners = new Listeners()
+  listeners:Listeners
   _value: Value<T> | null = null
 
-  constructor(value: Initializer<T> | _NoValue = NoValue) {
+  id:number
+  name: string
+
+  constructor(value: Initializer<T> | _NoValue = NoValue, name: NameInit = null) {
+    this.id = LiveValueDebug.nextId
+    this.name = nameInitToName(name, this.id, "LiveValue")
+    this.listeners = new Listeners(this.name)
+    
+    // FIXME - debugEvent - create LiveValue
+    
     if (value instanceof _NoValue) {
       this._value = null
     } else if (typeof value === "function") {
@@ -19,15 +30,18 @@ export class LiveValue<T> {
     }
   }
 
-  addListener(listener: Listener) {
-    this.listeners.add(listener)
+  addListener(listener: Listener, name:string|null = null) {
+    // FIXME - debugEvent - add listener
+    this.listeners.add(listener, name)
   }
 
   removeListener(listener: Listener) {
+    // FIXME - debugEvent - remove listener
     this.listeners.remove(listener)
   }
 
   notifyListeners() {
+    // FIXME - debugEvent - notifying listeners
     this.listeners.notify()
   }
   
@@ -47,6 +61,7 @@ export class LiveValue<T> {
   }
 
   set value(value: T) {
+    // FIXME - debugEvent - set value
     if (this._value == null) {
       this._value = new AssignedValue(this, value)
       this.notifyListeners()
@@ -108,6 +123,7 @@ export class LiveValue<T> {
           resolve(value)
         }
       }
+      // FIXME - debugEvent - add name
       this.addListener(listener)
 
       // Set up the timeout
@@ -152,6 +168,7 @@ export class LiveValue<T> {
             resolve(this.value)
           }
         }
+        // FIXME - debugEvent - add name
         this.addListener(listener)
 
         // Set up the timeout

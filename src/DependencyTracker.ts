@@ -25,6 +25,7 @@ class _DependencyTracker {
   addDependency(dependency: LiveValue<any>) {
     const d = this.currentDependent
     if (d != null) {
+      // FIXME - debugEvent - add name
       d.addDependency(dependency)
     }
   }
