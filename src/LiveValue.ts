@@ -30,6 +30,10 @@ export class LiveValue<T> {
   notifyListeners() {
     this.listeners.notify()
   }
+  
+  get listenerCount():number {
+    return this.listeners.listenerCount
+  }
 
   get value(): T {
     if (this._value == null) {
@@ -55,6 +59,11 @@ export class LiveValue<T> {
     }
   }
 
+  // Returns if a value has been assigned
+  get hasValue():boolean {
+    return this._value != null
+  }
+
   // This will forcefully "disconnect" the value from its
   // dependencies, removing any listeners that cause this value to be
   // notified when those dependencies change.  This is intended to be
@@ -69,6 +78,92 @@ export class LiveValue<T> {
     if (this._value != null) {
       this._value.disconnectDependencies()
     }
+  }
+
+  // Waits for the value to change, then resolves the Promise with the
+  // new value.  If timeoutMsec is non-null and elapses, then the
+  // Promise rejects with an Error.
+  onChange(timeoutMsec:number|null = null):Promise<T> {
+    const ret = new Promise<T>((resolve, reject)=>{
+      let listener:(()=>void)|null = null
+      let t:ReturnType<typeof setTimeout>|null = null
+
+      // Function to remove the listener and clear the timeout
+      const cleanup = ()=>{
+        if (listener != null) {
+          this.removeListener(listener)
+        }
+        if (t != null) {
+          clearTimeout(t)
+        }
+      }
+
+      // Remember the original value to make sure it has changed
+      const hasOriginalValue = this.hasValue
+      const originalValue = hasOriginalValue ? this.value : null
+      listener = ()=>{
+        const value = this.value
+        if (!hasOriginalValue || value !== originalValue) {
+          cleanup()
+          resolve(value)
+        }
+      }
+      this.addListener(listener)
+
+      // Set up the timeout
+      if (timeoutMsec != null) {
+        t = setTimeout(()=>{
+          reject(new Error("LiveValue timeout"))
+          cleanup()
+        }, timeoutMsec)
+      }
+    })
+    return ret
+  }
+
+  // Returns a Promise that resolves to the LiveValue's value when
+  // that value causes the given test to return true.  If timeoutMsec
+  // is non-null and elapses, then the Promise rejects with an Error.
+  onMatch(test:(val:T)=>boolean, timeoutMsec:number|null = null):Promise<T> {
+    const ret = new Promise<T>((resolve, reject)=>{
+      // See if it matches immediately
+      if (this.hasValue && test(this.value)) {
+        resolve(this.value)
+      }
+      else {
+        let listener:(()=>void)|null = null
+        let t:ReturnType<typeof setTimeout>|null = null
+
+        // Function to remove the listener and clear the timeout
+        const cleanup = ()=>{
+          if (listener != null) {
+            this.removeListener(listener)
+          }
+          if (t != null) {
+            clearTimeout(t)
+          }
+        }
+
+        // Listen and test the value
+        listener = ()=>{
+          const value = this.value
+          if (test(value)) {
+            cleanup()
+            resolve(this.value)
+          }
+        }
+        this.addListener(listener)
+
+        // Set up the timeout
+        if (timeoutMsec != null) {
+          t = setTimeout(()=>{
+            reject(new Error("LiveValue timeout"))
+            cleanup()
+          }, timeoutMsec)
+        }
+      }
+    })
+    return ret
   }
 }
 
