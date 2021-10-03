@@ -43,9 +43,25 @@ Here there are two `LiveValue` objects whose values are incrementing at varying 
 
 When a function is passed to a `LiveValue`, that function is not evaluated until the first time the `value` property is accessed.  Its result is cached and returned with subsequent `value` calls until one of the dependencies changes, at which point that cached value is removed.  After that, the function is not re-evaluated until the next time `value` is accessed.
 
+### Additional Notification API's
+
 `LiveValue` provides a simple API that allows applications to be notified when a value may have changed, either because the `value` was set directly, or because a dependency's value changed.  This effectively offers applications the same ability given to the `useLiveValue` hook:
 
 ```
 addListener(listener: ()=>void)
 removeListener(listener: ()=>void)
+```
+
+`LiveValue` can also generate Promises that resolve the next time the `LiveValue`'s value changes, or matches a given test function.  These Promises can optionally be set to reject if a specified timeout elapses before the required condition is met.
+
+```
+onChange(timeoutMsec:number|null = null):Promise<T>
+onMatch(test: (val:T)=>boolean, timeoutMsec:number|null = null):Promise<T>
+```
+
+Sample usage:
+
+```
+const newValue = await liveValue.onChange()
+const matchingValue = await liveValue.onMatch(newVal=>newVal != null)
 ```
