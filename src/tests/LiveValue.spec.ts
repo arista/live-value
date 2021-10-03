@@ -1,5 +1,44 @@
 import {LiveValue} from "../LiveValue"
 
+afterEach(()=>jest.useRealTimers())
+
+function waitImmediate():Promise<void> {
+  return new Promise(resolve=>setImmediate(resolve))
+}
+
+function setupOnChange(timeoutMsec:number|null = null, assignValue:boolean = true) {
+  const calls:Array<number> = []
+  const errors:Array<Error> = []
+  const lv = assignValue ? new LiveValue(10) : new LiveValue<number>()
+  const p = (timeoutMsec != null) ? lv.onChange(timeoutMsec) : lv.onChange()
+  p.then(val=>calls.push(val)).catch(e=>errors.push(e))
+  expect(calls).toEqual([])
+  expect(errors).toEqual([])
+
+  return {lv, calls, errors}
+}
+
+function setupOnMatch(timeoutMsec:number|null = null, assignValue:boolean = true, assignedValue:number|null = null) {
+  const calls:Array<number> = []
+  const errors:Array<Error> = []
+  const lv = assignValue ? new LiveValue(assignedValue == null ? 10 : assignedValue) : new LiveValue<number>()
+  const test = (v:number)=>v === 30
+  const p = (timeoutMsec != null) ? lv.onMatch(test, timeoutMsec) : lv.onMatch(test)
+  p.then(val=>calls.push(val)).catch(e=>errors.push(e))
+  expect(calls).toEqual([])
+  expect(errors).toEqual([])
+
+  return {lv, calls, errors}
+}
+
+/*
+function wait(msec:number):Promise<void> {
+  const p = new Promise(resolve=>setTimeout(resolve, msec))
+  jest.runAllTimers()
+  return p
+}
+*/
+
 describe("LiveValue", () => {
   describe("with a non-function value", () => {
     it("should return the value in a getter", () => {
@@ -283,6 +322,227 @@ describe("LiveValue", () => {
       expect(lv1count).toBe(2)
       expect(lv3.value).toBe(18)
       expect(lv3count).toBe(4)
+    })
+  })
+  describe("onChange", () => {
+    it("should resolve if the value is later changed", async ()=>{
+      const test = setupOnChange()
+
+      // Change the value asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([])
+      expect(test.errors).toEqual([])
+
+      // Change the value
+      test.lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([20])
+      expect(test.errors).toEqual([])
+    })
+    it("should resolve if the value changes synchronously immediately after onChange is called", async ()=>{
+      const test = setupOnChange()
+
+      // Change the value immediately
+      test.lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([20])
+      expect(test.errors).toEqual([])
+    })
+    it("should only reolve once", async ()=>{
+      const test = setupOnChange()
+
+      // Change the value immediately
+      test.lv.value = 20
+
+      // Change the value again
+      test.lv.value = 30
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([20])
+      expect(test.errors).toEqual([])
+    })
+    it("should reject if the timeout elapses", async ()=>{
+      jest.useFakeTimers()
+      
+      const test = setupOnChange(10000)
+
+      // Wait for the timer to elapse
+      jest.runAllTimers()
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([])
+      expect(test.errors).toEqual([new Error("LiveValue timeout")])
+    })
+    it("should not reject if the timeout elapses after the value changes", async ()=>{
+      jest.useFakeTimers()
+      
+      const test = setupOnChange(10000)
+
+      await waitImmediate()
+      test.lv.value = 20
+
+      // Wait for the timer to elapse
+      jest.runAllTimers()
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([20])
+      expect(test.errors).toEqual([])
+    })
+    it("after resolving, it should no longer have listeners", async ()=>{
+      const test = setupOnChange()
+
+      // Change the value asynchronously
+      await waitImmediate()
+      expect(test.lv.listenerCount > 0).toBe(true)
+      test.lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.lv.listenerCount).toBe(0)
+    })
+    it("after timing out, it should no longer have listeners", async ()=>{
+      jest.useFakeTimers()
+      
+      const test = setupOnChange(10000)
+
+      await waitImmediate()
+      expect(test.lv.listenerCount > 0).toBe(true)
+
+      // Wait for the timer to elapse
+      jest.runAllTimers()
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.lv.listenerCount).toBe(0)
+    })
+    it("work if no value was assigned at first", async ()=>{
+      const test = setupOnChange(null, false)
+
+      // Change the value synchronously
+      test.lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([20])
+      expect(test.errors).toEqual([])
+    })
+    it("work for computed values", async ()=>{
+      const calls:Array<number> = []
+      const lv = new LiveValue(10)
+      const lv2 = new LiveValue(()=>lv.value * 2)
+      const p = lv2.onChange()
+      p.then(val=>calls.push(val))
+
+      expect(lv2.value).toBe(20)
+      expect(calls).toEqual([])
+
+      lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(calls).toEqual([40])
+    })
+    it("should not call if the value hasn't actually changed", async ()=>{
+      const calls:Array<number> = []
+      const lv = new LiveValue(10)
+      const lv2 = new LiveValue(20)
+      const lv3 = new LiveValue(()=>(lv.value * 0) + lv2.value)
+      const p = lv3.onChange()
+      p.then(val=>calls.push(val))
+
+      expect(lv3.value).toBe(20)
+      expect(calls).toEqual([])
+
+      // Change the value that shouldn't affect lv3
+      lv.value = 20
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(calls).toEqual([])
+
+      // Change the value that should affect lv3
+      lv2.value = 30
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(calls).toEqual([30])
+    })
+  })
+  describe("onMatch", () => {
+    it("should resolve if the value is changed to match", async ()=>{
+      const test = setupOnMatch()
+
+      test.lv.value = 30
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([30])
+    })
+    it("should not resolve until the value is changed to match", async ()=>{
+      const test = setupOnMatch()
+
+      test.lv.value = 40
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([])
+
+      test.lv.value = 30
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([30])
+    })
+    it("should resolve immediately if the value already matches", async ()=>{
+      const test = setupOnMatch(null, true, 30)
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([30])
+    })
+    it("should work if no value was originally assigned", async ()=>{
+      const test = setupOnMatch(null, false)
+
+      test.lv.value = 30
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([30])
+    })
+    it("should reject if the timeout elapses", async ()=>{
+      jest.useFakeTimers()
+
+      const test = setupOnMatch(10000)
+
+      // Wait for the timer to elapse
+      jest.runAllTimers()
+
+      // node will resolve the Promise asynchronously
+      await waitImmediate()
+      expect(test.calls).toEqual([])
+      expect(test.errors).toEqual([new Error("LiveValue timeout")])
+    })
+    it("should have no listeners once the value matches", async ()=>{
+      const test = setupOnMatch()
+      await waitImmediate()
+      expect(test.lv.listenerCount > 0).toBe(true)
+      test.lv.value = 40
+      await waitImmediate()
+      expect(test.lv.listenerCount > 0).toBe(true)
+      test.lv.value = 30
+      await waitImmediate()
+      expect(test.lv.listenerCount == 0).toBe(true)
+    })
+    it("should have no listeners once the value rejects", async ()=>{
+      jest.useFakeTimers()
+      const test = setupOnMatch(10000)
+      await waitImmediate()
+      expect(test.lv.listenerCount > 0).toBe(true)
+      jest.runAllTimers()
+      expect(test.lv.listenerCount == 0).toBe(true)
     })
   })
 })

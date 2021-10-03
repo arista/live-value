@@ -31,6 +31,10 @@ export class Listeners {
       }
     }
   }
+
+  get listenerCount():number {
+    return (this.listeners == null) ? 0 : this.listeners.length
+  }
 }
 
 export type Listener = () => void
