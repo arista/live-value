@@ -8,8 +8,13 @@ export interface State<T> {
   liveValue: LiveValue<T>
 }
 
-function toLiveValue<T>(liveValue: useOrCreateLiveValueProps<T>, name:string|null): LiveValue<T> {
-  return typeof liveValue === "function" ? new LiveValue(liveValue, name) : liveValue
+function toLiveValue<T>(
+  liveValue: useOrCreateLiveValueProps<T>,
+  name: string | null
+): LiveValue<T> {
+  return typeof liveValue === "function"
+    ? new LiveValue(liveValue, name)
+    : liveValue
 }
 
 // Returns either the passed-in LiveValue, or a LiveValue created
@@ -20,7 +25,7 @@ function toLiveValue<T>(liveValue: useOrCreateLiveValueProps<T>, name:string|nul
 // may occur, since the update function of setState is used to
 export function useOrCreateLiveValue<T>(
   props: useOrCreateLiveValueProps<T>,
-  name: string|null = null
+  name: string | null = null
 ): LiveValue<T> {
   // Put props into an Array, since props could be a function which
   // will confuse useState

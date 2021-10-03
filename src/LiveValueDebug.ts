@@ -1,8 +1,19 @@
+import * as DE from "./DebugEvent"
+
 export class _LiveValueDebug {
   idCounter = 1
+  isLogging = false
 
-  get nextId() {
+  nextId() {
     return this.idCounter++
+  }
+
+  logDebug(e: DE.DebugEvent) {
+    // FIXME - implement this
+  }
+
+  resetIdCounter() {
+    this.idCounter = 1
   }
 }
 

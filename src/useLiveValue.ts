@@ -7,9 +7,11 @@ import {NameInit, nameInitToName} from "./NameInit"
 
 export type useLiveValueProps<T> = LiveValue<T> | (() => T)
 
-export function useLiveValue<T>(props: useLiveValueProps<T>, name:NameInit = null): T {
-  const [id] = useState(()=>LiveValueDebug.nextId)
-  const _name = nameInitToName(name, id, "useLiveValue")
+export function useLiveValue<T>(
+  props: useLiveValueProps<T>,
+  name: NameInit = null
+): T {
+  const [_name] = useState(() => nameInitToName(name, "useLiveValue"))
 
   const listenerFunc = useForceRerender()
   const liveValue = useOrCreateLiveValue(props, _name)
