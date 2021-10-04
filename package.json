@@ -1,6 +1,6 @@
 {
   "name": "live-value",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple mechanism for connecting React components to changing model data",
   "keywords": [
     "typescript",
