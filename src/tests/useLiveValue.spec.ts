@@ -17,7 +17,7 @@ function firstListener<T>(liveValue: LiveValue<T>) {
   ) {
     return null
   } else {
-    return liveValue.listeners.listeners[0]
+    return liveValue.listeners.listeners[0].listener
   }
 }
 

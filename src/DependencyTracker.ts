@@ -1,5 +1,6 @@
 import {ComputedValue} from "./ComputedValue"
 import {LiveValue} from "./LiveValue"
+import {LiveValueDebug} from "./LiveValueDebug"
 
 export type DependencyCallback = () => void
 
@@ -25,6 +26,17 @@ class _DependencyTracker {
   addDependency(dependency: LiveValue<any>) {
     const d = this.currentDependent
     if (d != null) {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "AddingDependency",
+          dependentLiveValue: d.liveValue,
+          dependentLiveValueName: d.liveValue.name,
+          dependencyLiveValue: dependency,
+          dependencyLiveValueName: dependency.name,
+        })
+      }
+
       d.addDependency(dependency)
     }
   }

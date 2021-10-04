@@ -1,8 +1,9 @@
 import {useState} from "react"
+import {LiveValueDebug} from "./LiveValueDebug"
 
 // Returns a function that, when called, will force a re-render of the
 // containing component
-export function useForceRerender() {
+export function useForceRerender(name:string) {
   const setCount = useState(0)[1]
 
   // The rerender function forces an update by guaranteeing that a new
@@ -13,6 +14,13 @@ export function useForceRerender() {
   const [rerender] = useState(() => {
     let count = 1
     return () => {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "RerenderingUseLiveValue",
+          useLiveValueName: name,
+        })
+      }
       setCount(count++)
     }
   })
