@@ -327,7 +327,7 @@ export class LiveValue<T> {
     LiveValueDebug.logToConsole = false
   }
 
-  static DebugLog(props: {
+  static DebugToConsole(props: {
     enable: boolean
   }) {
     const {enable} = props

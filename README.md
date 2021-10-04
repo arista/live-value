@@ -84,10 +84,10 @@ The last method will convert a `DebugEvent` to a human-readable string.  For con
 LiveValue.enableDebugToConsole()
 LiveValue.disableDebugToConsole()
 ```
-When enabled, all `DebugEvent`s will automatically be converted to human-readable strings and logged through `console.log`.  A React app can do the same thing with a component:
+This will automatically convert all `DebugEvents` to human-readable strings and log them through `console.log`.  A React app can do the same thing with a component:
 
 ```
-<LiveValue.DebugLog enable={true|false} />
+<LiveValue.DebugToConsole enable={true|false} />
 ```
 
 The debugging events and logs include names for the various objects and operations: LiveValue instances, useLiveValue hooks, listeners, onChange/onMatch, etc.  By default, these names are generated automatically using in incrementing counter, but can be overridden:
