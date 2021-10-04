@@ -1,6 +1,7 @@
 import {Value} from "./Value"
 import {LiveValue} from "./LiveValue"
 import {DependencyTracker} from "./DependencyTracker"
+import {LiveValueDebug} from "./LiveValueDebug"
 
 export class ComputedValue<T> extends Value<T> {
   valid = false
@@ -16,6 +17,16 @@ export class ComputedValue<T> extends Value<T> {
     if (!this.valid) {
       this.computedValue = DependencyTracker.withDependent(this, this.f)
       this.valid = true
+
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "ComputedValue",
+          liveValueName: this.liveValue.name,
+          liveValue: this.liveValue,
+          newValue: this.computedValue,
+        })
+      }
     }
     // Can't rule out being null, since that might be part of type T
     return this.computedValue as any
@@ -28,8 +39,19 @@ export class ComputedValue<T> extends Value<T> {
   onDependencyNotify() {
     if (this.valid) {
       this.valid = false
+      const oldValue = this.computedValue
       this.computedValue = null
       this.disconnectDependencies()
+
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "InvalidatedComputedValue",
+          liveValueName: this.liveValue.name,
+          liveValue: this.liveValue,
+          oldValue: oldValue,
+        })
+      }
 
       // Notify listeners
       this.liveValue.notifyListeners()
@@ -39,6 +61,16 @@ export class ComputedValue<T> extends Value<T> {
   disconnectDependencies() {
     // Remove listener from all dependencies
     for (const dependency of this.dependencies) {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "RemovingDependency",
+          dependentLiveValue: this.liveValue,
+          dependentLiveValueName: this.liveValue.name,
+          dependencyLiveValue: dependency,
+          dependencyLiveValueName: dependency.name
+        })
+      }
       dependency.removeListener(this.dependencyListener)
     }
 

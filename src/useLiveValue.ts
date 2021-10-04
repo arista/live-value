@@ -12,13 +12,31 @@ export function useLiveValue<T>(
   name: NameInit = null
 ): T {
   const [_name] = useState(() => nameInitToName(name, "useLiveValue"))
-
-  const listenerFunc = useForceRerender()
+  const listenerFunc = useForceRerender(_name)
   const liveValue = useOrCreateLiveValue(props, _name)
 
   useEffect(() => {
+    // DebugEvent
+    if (LiveValueDebug.isLogging) {
+      LiveValueDebug.logDebug({
+        type: "ConnectingUseLiveValue",
+        useLiveValueName: _name,
+        liveValueName: liveValue.name,
+        liveValue: liveValue,
+      })
+    }
+
     liveValue.addListener(listenerFunc, _name)
     return () => {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "DisconnectingUseLiveValue",
+          useLiveValueName: _name,
+          liveValueName: liveValue.name,
+          liveValue: liveValue,
+        })
+      }
       liveValue.removeListener(listenerFunc)
     }
   }, [liveValue])

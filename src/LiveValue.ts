@@ -6,6 +6,7 @@ import {ComputedValue} from "./ComputedValue"
 import {DependencyTracker} from "./DependencyTracker"
 import {LiveValueDebug} from "./LiveValueDebug"
 import {NameInit, nameInitToName} from "./NameInit"
+import {DebugEvent} from "./DebugEvent"
 
 export class LiveValue<T> {
   listeners: Listeners
@@ -189,6 +190,7 @@ export class LiveValue<T> {
               liveValueName: this.name,
               liveValue: this,
               onChangeName: _name,
+              timeoutMsec
             })
           }
           reject(new Error("LiveValue timeout"))
@@ -277,6 +279,7 @@ export class LiveValue<T> {
                 liveValueName: this.name,
                 liveValue: this,
                 onMatchName: _name,
+                timeoutMsec
               })
             }
             reject(new Error("LiveValue timeout"))
@@ -286,6 +289,25 @@ export class LiveValue<T> {
       }
     })
     return ret
+  }
+
+  static addDebugListener(listener:(e:DebugEvent)=>void) {
+    LiveValueDebug.addListener(listener)
+  }
+
+  static removeDebugListener(listener:(e:DebugEvent)=>void) {
+    LiveValueDebug.removeListener(listener)
+  }
+
+  static debugEventToString(e:DebugEvent):string {
+    return LiveValueDebug.debugEventToString(e)
+  }
+
+  static ConsoleLog(props: {
+    enable: boolean
+  }) {
+    const {enable} = props
+    LiveValueDebug.logToConsole = enable
   }
 }
 

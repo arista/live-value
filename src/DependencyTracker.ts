@@ -26,18 +26,18 @@ class _DependencyTracker {
   addDependency(dependency: LiveValue<any>) {
     const d = this.currentDependent
     if (d != null) {
-      d.addDependency(dependency)
-
       // DebugEvent
       if (LiveValueDebug.isLogging) {
         LiveValueDebug.logDebug({
-          type: "AddedDependency",
+          type: "AddingDependency",
           dependentLiveValue: d.liveValue,
           dependentLiveValueName: d.liveValue.name,
           dependencyLiveValue: dependency,
           dependencyLiveValueName: dependency.name,
         })
       }
+
+      d.addDependency(dependency)
     }
   }
 
