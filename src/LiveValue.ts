@@ -332,6 +332,7 @@ export class LiveValue<T> {
   }) {
     const {enable} = props
     LiveValueDebug.logToConsole = enable
+    return null
   }
 }
 
