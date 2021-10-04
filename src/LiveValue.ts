@@ -8,6 +8,8 @@ import {LiveValueDebug} from "./LiveValueDebug"
 import {NameInit, nameInitToName} from "./NameInit"
 import {DebugEvent} from "./DebugEvent"
 
+export type {DebugEvent} from "./DebugEvent"
+
 export class LiveValue<T> {
   listeners: Listeners
   _value: Value<T> | null = null
@@ -21,20 +23,36 @@ export class LiveValue<T> {
     this.name = nameInitToName(name, "LiveValue")
     this.listeners = new Listeners(this)
 
-    // DebugEvent
-    if (LiveValueDebug.isLogging) {
-      LiveValueDebug.logDebug({
-        type: "CreatingLiveValue",
-        liveValueName: this.name,
-        liveValue: this,
-      })
-    }
-
     if (value instanceof _NoValue) {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "CreatingUninitializedLiveValue",
+          liveValueName: this.name,
+          liveValue: this,
+        })
+      }
       this._value = null
     } else if (typeof value === "function") {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "CreatingComputedLiveValue",
+          liveValueName: this.name,
+          liveValue: this,
+        })
+      }
       this._value = new ComputedValue(this, value as any)
     } else {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "CreatingLiveValue",
+          liveValueName: this.name,
+          liveValue: this,
+          value
+        })
+      }
       this._value = new AssignedValue(this, value)
     }
   }
@@ -177,8 +195,7 @@ export class LiveValue<T> {
           resolve(value)
         }
       }
-      // FIXME - debugEvent - add name
-      this.addListener(listener)
+      this.addListener(listener, _name)
 
       // Set up the timeout
       if (timeoutMsec != null) {
@@ -266,8 +283,7 @@ export class LiveValue<T> {
             resolve(this.value)
           }
         }
-        // FIXME - debugEvent - add name
-        this.addListener(listener)
+        this.addListener(listener, _name)
 
         // Set up the timeout
         if (timeoutMsec != null) {
@@ -301,6 +317,14 @@ export class LiveValue<T> {
 
   static debugEventToString(e:DebugEvent):string {
     return LiveValueDebug.debugEventToString(e)
+  }
+
+  static enableLogToConsole() {
+    LiveValueDebug.logToConsole = true
+  }
+
+  static disableLogToConsole() {
+    LiveValueDebug.logToConsole = false
   }
 
   static ConsoleLog(props: {

@@ -52,11 +52,15 @@ export class _LiveValueDebug {
   debugEventToString(e:DebugEvent):string {
     switch(e.type) {
     case "CreatingLiveValue":
-      return `Creating LiveValue "${e.liveValueName}"`
-    case "AssignedInitialValue":
-      return `Assigned LiveValue "${e.liveValueName}" initial value of <${e.value}>`
+      return `Creating LiveValue "${e.liveValueName}" with initial value <${e.value}>`
+    case "CreatingUninitializedLiveValue":
+      return `Creating LiveValue "${e.liveValueName}" with no initial value`
+    case "CreatingComputedLiveValue":
+      return `Creating computed LiveValue "${e.liveValueName}"`
     case "AssignedNewValue":
       return `Changed LiveValue "${e.liveValueName}" value from <${e.oldValue}> to <${e.newValue}>`
+    case "ComputingValue":
+      return `Computing LiveValue "${e.liveValueName}"`
     case "ComputedValue":
       return `Computed LiveValue "${e.liveValueName}" as <${e.newValue}>`
     case "InvalidatedComputedValue":
@@ -70,9 +74,9 @@ export class _LiveValueDebug {
     case "NotifyingListener":
       return `Notifying listener ${e.listenerName} of LiveValue "${e.liveValueName}"`
     case "AddingDependency":
-      return `Adding LiveValue ${e.dependencyLiveValueName} as a dependency of LiveValue "${e.dependentLiveValueName}"`
+      return `LiveValue "${e.dependentLiveValueName}" depends on LiveValue "${e.dependencyLiveValueName}"`
     case "RemovingDependency":
-      return `Removing LiveValue ${e.dependencyLiveValueName} as a dependency of LiveValue "${e.dependentLiveValueName}"`
+      return `LiveValue "${e.dependentLiveValueName}" no longer depends on LiveValue "${e.dependencyLiveValueName}"`
     case "StartingOnChange":
       return `Starting onChange "${e.onChangeName} on LiveValue "${e.liveValueName}"`
     case "ResolvingOnChange":

@@ -5,16 +5,6 @@ import {LiveValueDebug} from "./LiveValueDebug"
 export class AssignedValue<T> extends Value<T> {
   constructor(liveValue: LiveValue<T>, public _value: T) {
     super(liveValue)
-
-    // DebugEvent
-    if (LiveValueDebug.isLogging) {
-      LiveValueDebug.logDebug({
-        type: "AssignedInitialValue",
-        liveValueName: this.liveValue.name,
-        liveValue: this.liveValue,
-        value: _value,
-      })
-    }
   }
 
   getValue() {

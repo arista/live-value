@@ -15,6 +15,15 @@ export class ComputedValue<T> extends Value<T> {
 
   getValue(): T {
     if (!this.valid) {
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "ComputingValue",
+          liveValueName: this.liveValue.name,
+          liveValue: this.liveValue,
+        })
+      }
+
       this.computedValue = DependencyTracker.withDependent(this, this.f)
       this.valid = true
 
@@ -81,7 +90,7 @@ export class ComputedValue<T> extends Value<T> {
   addDependency(liveValue: LiveValue<any>) {
     if (this.dependencies.indexOf(liveValue) < 0) {
       this.dependencies.push(liveValue)
-      liveValue.addListener(this.dependencyListener)
+      liveValue.addListener(this.dependencyListener, this.liveValue.name)
     }
   }
 

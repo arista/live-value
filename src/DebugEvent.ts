@@ -2,8 +2,10 @@ import {LiveValue} from "./LiveValue"
 
 export type DebugEvent =
   | CreatingLiveValue
-  | AssignedInitialValue
+  | CreatingUninitializedLiveValue
+  | CreatingComputedLiveValue
   | AssignedNewValue
+  | ComputingValue
   | ComputedValue
   | InvalidatedComputedValue
   | AddedListener
@@ -26,6 +28,19 @@ export interface CreatingLiveValue {
   type: "CreatingLiveValue"
   liveValueName: string
   liveValue: LiveValue<any>
+  value: any
+}
+
+export interface CreatingUninitializedLiveValue {
+  type: "CreatingUninitializedLiveValue"
+  liveValueName: string
+  liveValue: LiveValue<any>
+}
+
+export interface CreatingComputedLiveValue {
+  type: "CreatingComputedLiveValue"
+  liveValueName: string
+  liveValue: LiveValue<any>
 }
 
 export interface AssignedInitialValue {
@@ -41,6 +56,12 @@ export interface AssignedNewValue {
   liveValue: LiveValue<any>
   oldValue: any
   newValue: any
+}
+
+export interface ComputingValue {
+  type: "ComputingValue"
+  liveValueName: string
+  liveValue: LiveValue<any>
 }
 
 export interface ComputedValue {
