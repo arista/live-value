@@ -1,5 +1,5 @@
 import {useOrCreateLiveValue} from "../useOrCreateLiveValue"
-import {useLiveValueProps} from "../useLiveValue"
+import {LiveValueProp} from "../useLiveValue"
 import {LiveValue} from "../LiveValue"
 import {renderHook, act} from "@testing-library/react-hooks"
 
@@ -21,7 +21,7 @@ describe("useOrCreateLiveValue", () => {
     it("should return that value", () => {
       const lv1 = new LiveValue(10)
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: lv1,
         }
@@ -37,7 +37,7 @@ describe("useOrCreateLiveValue", () => {
     it("should return different values if rerendered with different values", () => {
       const lv1 = new LiveValue(10)
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: lv1,
         }
@@ -56,7 +56,7 @@ describe("useOrCreateLiveValue", () => {
     it("should return a different LiveValue if later called with a function", () => {
       const lv1 = new LiveValue(10)
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: lv1,
         }
@@ -79,7 +79,7 @@ describe("useOrCreateLiveValue", () => {
       const lv1 = new LiveValue(10)
       const f = () => lv1.value * 2
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: f,
         }
@@ -99,7 +99,7 @@ describe("useOrCreateLiveValue", () => {
       const lv1 = new LiveValue(10)
       const f1 = () => lv1.value * 2
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: f1,
         }
@@ -128,7 +128,7 @@ describe("useOrCreateLiveValue", () => {
       const lv1 = new LiveValue(10)
       const f1 = () => lv1.value * 2
       const result = renderHook(
-        (props: useLiveValueProps<number>) => useOrCreateLiveValue(props),
+        (props: LiveValueProp<number>) => useOrCreateLiveValue(props),
         {
           initialProps: f1,
         }

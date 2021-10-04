@@ -5,41 +5,89 @@ import {useOrCreateLiveValue} from "./useOrCreateLiveValue"
 import {LiveValueDebug} from "./LiveValueDebug"
 import {NameInit, nameInitToName} from "./NameInit"
 
-export type useLiveValueProps<T> = LiveValue<T> | (() => T)
+export type LiveValueProp<T> = LiveValue<T> | (() => T)
 
-export function useLiveValue<T>(
-  props: useLiveValueProps<T>,
-  name: NameInit = null
-): T {
-  const [_name] = useState(() => nameInitToName(name, "useLiveValue"))
-  const listenerFunc = useForceRerender(_name)
-  const liveValue = useOrCreateLiveValue(props, _name)
+class UseLiveValueState<T> {
+  initialized = false
 
-  useEffect(() => {
+  forceRerenderFunc!: ()=>void
+  forceRerenderCounter = 1
+
+  latestLiveValueProp!: LiveValueProp<T>
+  latestNameProp!: NameInit
+
+  name!: string
+  liveValue!: LiveValue<T>
+  
+  onRender(liveValueProp: LiveValueProp<T>, nameProp: NameInit):T {
+    const setCount = useState(0)[1]
+    useEffect(()=>{
+      return ()=>this.disconnectFromLiveValue()
+    })
+
+    if (!this.initialized) {
+      // Set up the function that will effectively force rerendering by
+      // incrementing a counter
+      this.forceRerenderFunc = ()=>setCount(this.forceRerenderCounter++)
+
+      // Set up the name and value
+      this.initializeNameAndLiveValue(liveValueProp, nameProp)
+      this.connectToLiveValue()
+      this.initialized = true
+    }
+    else if (this.latestLiveValueProp !== liveValueProp ||
+             this.latestNameProp !== nameProp) {
+      // Re-set up the name and value
+      this.disconnectFromLiveValue()
+      this.initializeNameAndLiveValue(liveValueProp, nameProp)
+      this.connectToLiveValue()
+    }
+    this.latestLiveValueProp = liveValueProp
+    this.latestNameProp = nameProp
+
+    return this.liveValue.value
+  }
+
+  initializeNameAndLiveValue(liveValueProp: LiveValueProp<T>, nameProp: NameInit) {
+    this.name = nameInitToName(nameProp, "useLiveValue")
+    this.liveValue = (typeof liveValueProp === "function")
+      ? new LiveValue(liveValueProp, this.name)
+      : liveValueProp
+  }
+
+  disconnectFromLiveValue() {
+    // DebugEvent
+    if (LiveValueDebug.isLogging) {
+      LiveValueDebug.logDebug({
+        type: "DisconnectingUseLiveValue",
+        useLiveValueName: this.name,
+        liveValueName: this.liveValue.name,
+        liveValue: this.liveValue,
+      })
+    }
+    this.liveValue.removeListener(this.forceRerenderFunc)
+  }
+
+  connectToLiveValue() {
     // DebugEvent
     if (LiveValueDebug.isLogging) {
       LiveValueDebug.logDebug({
         type: "ConnectingUseLiveValue",
-        useLiveValueName: _name,
-        liveValueName: liveValue.name,
-        liveValue: liveValue,
+        useLiveValueName: this.name,
+        liveValueName: this.liveValue.name,
+        liveValue: this.liveValue,
       })
     }
 
-    liveValue.addListener(listenerFunc, _name)
-    return () => {
-      // DebugEvent
-      if (LiveValueDebug.isLogging) {
-        LiveValueDebug.logDebug({
-          type: "DisconnectingUseLiveValue",
-          useLiveValueName: _name,
-          liveValueName: liveValue.name,
-          liveValue: liveValue,
-        })
-      }
-      liveValue.removeListener(listenerFunc)
-    }
-  }, [liveValue])
+    this.liveValue.addListener(this.forceRerenderFunc, this.name)
+  }
+}
 
-  return liveValue.value
+export function useLiveValue<T>(
+  liveValue: LiveValueProp<T>,
+  name: NameInit = null
+): T {
+  // Construct a UseLiveValueState once, call onRender on it each time
+  const state = useState(()=>new UseLiveValueState<T>())[0]
+  return state.onRender(liveValue, name)
 }

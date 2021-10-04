@@ -72,23 +72,23 @@ export class _LiveValueDebug {
     case "NotifyingListeners":
       return `Notifying ${e.listenerCount} listener${e.listenerCount == 1 ? "" : "s"} of LiveValue "${e.liveValueName}"`
     case "NotifyingListener":
-      return `Notifying listener ${e.listenerName} of LiveValue "${e.liveValueName}"`
+      return `Notifying listener "${e.listenerName}" of LiveValue "${e.liveValueName}"`
     case "AddingDependency":
       return `LiveValue "${e.dependentLiveValueName}" depends on LiveValue "${e.dependencyLiveValueName}"`
     case "RemovingDependency":
       return `LiveValue "${e.dependentLiveValueName}" no longer depends on LiveValue "${e.dependencyLiveValueName}"`
     case "StartingOnChange":
-      return `Starting onChange "${e.onChangeName} on LiveValue "${e.liveValueName}"`
+      return `Starting onChange "${e.onChangeName}" on LiveValue "${e.liveValueName}"`
     case "ResolvingOnChange":
-      return `Resolving onChange "${e.onChangeName} on LiveValue "${e.liveValueName}" with value ${e.value}`
+      return `Resolving onChange "${e.onChangeName}" on LiveValue "${e.liveValueName}" with value <${e.value}>`
     case "TimingOutOnChange":
-      return `Timed Out onChange "${e.onChangeName} on LiveValue "${e.liveValueName}" after ${e.timeoutMsec}ms`
+      return `Timed Out onChange "${e.onChangeName}" on LiveValue "${e.liveValueName}" after ${e.timeoutMsec}ms`
     case "StartingOnMatch":
-      return `Starting onMatch "${e.onMatchName} on LiveValue "${e.liveValueName}"`
+      return `Starting onMatch "${e.onMatchName}" on LiveValue "${e.liveValueName}"`
     case "ResolvingOnMatch":
-      return `Resolving onMatch "${e.onMatchName} on LiveValue "${e.liveValueName}" with value ${e.value}`
+      return `Resolving onMatch "${e.onMatchName}" on LiveValue "${e.liveValueName}" with value <${e.value}>`
     case "TimingOutOnMatch":
-      return `Timed Out onMatch "${e.onMatchName} on LiveValue "${e.liveValueName}" after ${e.timeoutMsec}ms`
+      return `Timed Out onMatch "${e.onMatchName}" on LiveValue "${e.liveValueName}" after ${e.timeoutMsec}ms`
     case "ConnectingUseLiveValue":
       return `Connecting useLiveValue "${e.useLiveValueName}" to LiveValue "${e.liveValueName}"`
     case "DisconnectingUseLiveValue":
