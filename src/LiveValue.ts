@@ -50,7 +50,7 @@ export class LiveValue<T> {
           type: "CreatingLiveValue",
           liveValueName: this.name,
           liveValue: this,
-          value
+          value,
         })
       }
       this._value = new AssignedValue(this, value)
@@ -207,7 +207,7 @@ export class LiveValue<T> {
               liveValueName: this.name,
               liveValue: this,
               onChangeName: _name,
-              timeoutMsec
+              timeoutMsec,
             })
           }
           reject(new Error("LiveValue timeout"))
@@ -295,7 +295,7 @@ export class LiveValue<T> {
                 liveValueName: this.name,
                 liveValue: this,
                 onMatchName: _name,
-                timeoutMsec
+                timeoutMsec,
               })
             }
             reject(new Error("LiveValue timeout"))
@@ -307,15 +307,15 @@ export class LiveValue<T> {
     return ret
   }
 
-  static addDebugListener(listener:(e:DebugEvent)=>void) {
+  static addDebugListener(listener: (e: DebugEvent) => void) {
     LiveValueDebug.addListener(listener)
   }
 
-  static removeDebugListener(listener:(e:DebugEvent)=>void) {
+  static removeDebugListener(listener: (e: DebugEvent) => void) {
     LiveValueDebug.removeListener(listener)
   }
 
-  static debugEventToString(e:DebugEvent):string {
+  static debugEventToString(e: DebugEvent): string {
     return LiveValueDebug.debugEventToString(e)
   }
 
@@ -327,9 +327,7 @@ export class LiveValue<T> {
     LiveValueDebug.logToConsole = false
   }
 
-  static DebugToConsole(props: {
-    enable: boolean
-  }) {
+  static DebugToConsole(props: {enable: boolean}) {
     const {enable} = props
     LiveValueDebug.logToConsole = enable
     return null
