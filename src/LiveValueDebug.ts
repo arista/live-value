@@ -91,6 +91,10 @@ export class _LiveValueDebug {
         return `Resolving onMatch "${e.onMatchName}" on LiveValue "${e.liveValueName}" with value <${e.value}>`
       case "TimingOutOnMatch":
         return `Timed Out onMatch "${e.onMatchName}" on LiveValue "${e.liveValueName}" after ${e.timeoutMsec}ms`
+      case "MountingUseLiveValue":
+        return `Mounting useLiveValue "${e.useLiveValueName}"`
+      case "UnmountingUseLiveValue":
+        return `Unmounting useLiveValue "${e.useLiveValueName}"`
       case "ConnectingUseLiveValue":
         return `Connecting useLiveValue "${e.useLiveValueName}" to LiveValue "${e.liveValueName}"`
       case "DisconnectingUseLiveValue":

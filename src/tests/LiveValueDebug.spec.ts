@@ -34,6 +34,8 @@ describe("LiveValueDebug", () => {
         lv2.value += "h"
       })
 
+      hookResult.unmount()
+
       const expected = [
         `Creating LiveValue "lv1" with initial value <abc>`,
         `Creating LiveValue "lv2" with initial value <def>`,
@@ -48,6 +50,7 @@ describe("LiveValueDebug", () => {
         `Added listener "onChange#2" to LiveValue "LiveValue#1"`,
         `Starting onMatch "onMatch#3" on LiveValue "LiveValue#1"`,
         `Added listener "onMatch#3" to LiveValue "LiveValue#1"`,
+        `Mounting useLiveValue "useLiveValue#4"`,
         `Connecting useLiveValue "useLiveValue#4" to LiveValue "LiveValue#1"`,
         `Added listener "useLiveValue#4" to LiveValue "LiveValue#1"`,
         `Changed LiveValue "lv2" value from <def> to <defg>`,
@@ -91,6 +94,13 @@ describe("LiveValueDebug", () => {
         `Resolving onMatch "onMatch#3" on LiveValue "LiveValue#1" with value <abcdefgh>`,
         `Notifying listener "useLiveValue#4" of LiveValue "LiveValue#1"`,
         `Rerendering useLiveValue "useLiveValue#4"`,
+        `Unmounting useLiveValue "useLiveValue#4"`,
+        `Disconnecting useLiveValue "useLiveValue#4" from LiveValue "LiveValue#1"`,
+        `LiveValue "LiveValue#1" no longer depends on LiveValue "lv1"`,
+        `Removed listener "LiveValue#1" from LiveValue "lv1"`,
+        `LiveValue "LiveValue#1" no longer depends on LiveValue "lv2"`,
+        `Removed listener "LiveValue#1" from LiveValue "lv2"`,
+        `Removed listener "useLiveValue#4" from LiveValue "LiveValue#1"`,
       ]
       expect(expected).toEqual(msgs)
     })

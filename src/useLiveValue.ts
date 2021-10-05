@@ -29,7 +29,16 @@ class UseLiveValueState<T> {
 
     // Set up a callback for when the component is unmounted
     useEffect(() => {
-      return () => this.disconnectFromLiveValue()
+      return () => {
+        // DebugEvent
+        if (LiveValueDebug.isLogging) {
+          LiveValueDebug.logDebug({
+            type: "UnmountingUseLiveValue",
+            useLiveValueName: this.name,
+          })
+        }
+        this.disconnectFromLiveValue()
+      }
     }, [])
 
     if (this.isFirstRender) {
@@ -49,6 +58,15 @@ class UseLiveValueState<T> {
 
       // Set up the name and value
       this.initializeNameAndLiveValue(liveValueProp, nameProp)
+
+      // DebugEvent
+      if (LiveValueDebug.isLogging) {
+        LiveValueDebug.logDebug({
+          type: "MountingUseLiveValue",
+          useLiveValueName: this.name,
+        })
+      }
+
       this.connectToLiveValue()
       this.isFirstRender = false
     } else if (
