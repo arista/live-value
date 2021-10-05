@@ -3,29 +3,33 @@ import {LiveValueDebug} from "../LiveValueDebug"
 import {useLiveValue} from "../useLiveValue"
 import {renderHook, act} from "@testing-library/react-hooks"
 
-beforeEach(()=>LiveValueDebug.resetIdCounter())
+beforeEach(() => LiveValueDebug.resetIdCounter())
 
 describe("LiveValueDebug", () => {
-  describe("generating strings", ()=>{
-    it("should generate the expected strings", ()=>{
-      const msgs:Array<string> = []
-      const listener = (e:DebugEvent)=>msgs.push(LiveValue.debugEventToString(e))
+  describe("generating strings", () => {
+    it("should generate the expected strings", () => {
+      const msgs: Array<string> = []
+      const listener = (e: DebugEvent) =>
+        msgs.push(LiveValue.debugEventToString(e))
       LiveValue.addDebugListener(listener)
 
       const lv1 = new LiveValue("abc", "lv1")
       const lv2 = new LiveValue("def", "lv2")
-      const lv3 = new LiveValue(()=>lv1.value + lv2.value)
+      const lv3 = new LiveValue(() => lv1.value + lv2.value)
 
       expect(lv3.value).toEqual("abcdef")
 
       lv3.onChange()
-      lv3.onMatch(v=>v === "abcdefgh")
+      lv3.onMatch((v) => v === "abcdefgh")
 
-      const hookResult = renderHook((lv: LiveValue<string>) => useLiveValue(lv), {
-        initialProps: lv3,
-      })
+      const hookResult = renderHook(
+        (lv: LiveValue<string>) => useLiveValue(lv),
+        {
+          initialProps: lv3,
+        }
+      )
 
-      act(()=>{
+      act(() => {
         lv2.value += "g"
         lv2.value += "h"
       })

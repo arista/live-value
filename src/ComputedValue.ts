@@ -77,7 +77,7 @@ export class ComputedValue<T> extends Value<T> {
           dependentLiveValue: this.liveValue,
           dependentLiveValueName: this.liveValue.name,
           dependencyLiveValue: dependency,
-          dependencyLiveValueName: dependency.name
+          dependencyLiveValueName: dependency.name,
         })
       }
       dependency.removeListener(this.dependencyListener)
