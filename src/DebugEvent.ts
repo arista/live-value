@@ -20,6 +20,8 @@ export type DebugEvent =
   | StartingOnMatch
   | ResolvingOnMatch
   | TimingOutOnMatch
+  | MountingUseLiveValue
+  | UnmountingUseLiveValue
   | ConnectingUseLiveValue
   | DisconnectingUseLiveValue
   | RerenderingUseLiveValue
@@ -173,6 +175,16 @@ export interface TimingOutOnMatch {
   liveValueName: string
   onMatchName: string
   timeoutMsec: number
+}
+
+export interface MountingUseLiveValue {
+  type: "MountingUseLiveValue"
+  useLiveValueName: string
+}
+
+export interface UnmountingUseLiveValue {
+  type: "UnmountingUseLiveValue"
+  useLiveValueName: string
 }
 
 export interface ConnectingUseLiveValue {
