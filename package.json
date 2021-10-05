@@ -1,10 +1,10 @@
 {
   "name": "live-value",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A simple mechanism for connecting React components to changing model data",
   "keywords": [
     "typescript",
-    "template"
+    "react"
   ],
   "license": "MIT",
   "author": "Nathan Abramson",
