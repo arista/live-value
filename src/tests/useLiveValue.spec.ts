@@ -109,7 +109,7 @@ describe("useLiveValue", () => {
       expect(result.result.all.length).toBe(1)
       expect(result.result.current).toBe(10)
     })
-    it("move its listener if rendered with a new LiveValue", () => {
+    it("create a new listener if rendered with a new LiveValue", () => {
       const lv1 = new LiveValue(10)
       const result = renderHook((lv: LiveValue<number>) => useLiveValue(lv), {
         initialProps: lv1,
@@ -124,9 +124,9 @@ describe("useLiveValue", () => {
 
       expect(listenerCount(lv1)).toBe(0)
       expect(listenerCount(lv2)).toBe(1)
-      expect(firstListener(lv2)).toBe(l1)
+      expect(firstListener(lv2)).not.toBe(l1)
 
-      expect(result.result.all).toEqual([10, 50])
+      expect(result.result.all).toEqual([10, 10, 50])
       expect(result.result.current).toBe(50)
     })
   })
@@ -151,29 +151,6 @@ describe("useLiveValue", () => {
       })
       expect(result.result.all.length).toBe(3)
       expect(result.result.current).toBe(5)
-    })
-  })
-  describe("with a function", () => {
-    it("should use the value computed from the specified function", () => {
-      let fcount = 0
-      const f = () => {
-        fcount++
-        return 10
-      }
-
-      const result = renderHook(
-        (lv: LiveValue<number> | (() => number)) => useLiveValue(lv),
-        {initialProps: f}
-      )
-      expect(result.result.all.length).toBe(1)
-      expect(result.result.current).toBe(10)
-      expect(fcount).toBe(1)
-
-      // It shouldn't call the function again
-      result.rerender(f)
-      expect(result.result.all.length).toBe(2)
-      expect(result.result.current).toBe(10)
-      expect(fcount).toBe(1)
     })
   })
 })

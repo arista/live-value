@@ -96,10 +96,6 @@ describe("LiveValueDebug", () => {
         `Rerendering useLiveValue "useLiveValue#4"`,
         `Unmounting useLiveValue "useLiveValue#4"`,
         `Disconnecting useLiveValue "useLiveValue#4" from LiveValue "LiveValue#1"`,
-        `LiveValue "LiveValue#1" no longer depends on LiveValue "lv1"`,
-        `Removed listener "LiveValue#1" from LiveValue "lv1"`,
-        `LiveValue "LiveValue#1" no longer depends on LiveValue "lv2"`,
-        `Removed listener "LiveValue#1" from LiveValue "lv2"`,
         `Removed listener "useLiveValue#4" from LiveValue "LiveValue#1"`,
       ]
       expect(expected).toEqual(msgs)
