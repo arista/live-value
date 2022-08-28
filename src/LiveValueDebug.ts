@@ -71,7 +71,7 @@ export class _LiveValueDebug {
         return `Removed listener "${e.listenerName}" from LiveValue "${e.liveValueName}"`
       case "NotifyingListeners":
         return `Notifying ${e.listenerCount} listener${
-          e.listenerCount == 1 ? "" : "s"
+          e.listenerCount === 1 ? "" : "s"
         } of LiveValue "${e.liveValueName}"`
       case "NotifyingListener":
         return `Notifying listener "${e.listenerName}" of LiveValue "${e.liveValueName}"`

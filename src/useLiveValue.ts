@@ -3,139 +3,118 @@ import {useState, useEffect} from "react"
 import {LiveValueDebug} from "./LiveValueDebug"
 import {NameInit, nameInitToName} from "./NameInit"
 
-export type LiveValueProp<T> = LiveValue<T> | (() => T)
+// Generates a stable name from the given nameProp, updating that name
+// if the nameProp is changed
+function useLiveValueName(nameProp: NameInit): string {
+  const [{name, prevNameProp}, setName] = useState(() => {
+    return {
+      name: nameInitToName(nameProp, "useLiveValue"),
+      prevNameProp: nameProp,
+    }
+  })
 
-class UseLiveValueState<T> {
-  isFirstRender = true
+  // useEffect detects changes to nameProp and calls setName
+  // accordingly.  However, useEffect always runs at least once, which
+  // would have the undesired effect of generating the name at least
+  // twice when the component is mounted (once in the useState above,
+  // once in the useEffect).  To avoid this, we keep "prevNameProp" in
+  // our state to track the nameProp that was used to create the
+  // current name, and do our own change check.  This causes the
+  // setName to be skipped the first time useEffect is called, but
+  // called for subsequent changes to nameProp.
+  useEffect(() => {
+    if (nameProp !== prevNameProp) {
+      setName({
+        name: nameInitToName(nameProp, "useLiveValue"),
+        prevNameProp: nameProp,
+      })
+    }
+  }, [nameProp, prevNameProp])
 
-  // The callback function that will act as a Listener on the
-  // LiveValue
-  forceRerenderFunc!: () => void
+  return name
+}
 
-  // Keep track of the values passed in on the previous render
-  latestLiveValueProp!: LiveValueProp<T>
-  latestNameProp!: NameInit
-
-  // The name assigned to the useLiveValue instance
-  name!: string
-
-  // The current LiveValue this is listening to
-  liveValue!: LiveValue<T>
-
-  // Call with every render
-  onRender(liveValueProp: LiveValueProp<T>, nameProp: NameInit): T {
-    // The state update function used to force re-renders
-    const setCount = useState(0)[1]
-
-    // Set up a callback for when the component is unmounted
-    useEffect(() => {
-      return () => {
-        // DebugEvent
-        if (LiveValueDebug.isLogging) {
-          LiveValueDebug.logDebug({
-            type: "UnmountingUseLiveValue",
-            useLiveValueName: this.name,
-          })
-        }
-        this.disconnectFromLiveValue()
-      }
-    }, [])
-
-    if (this.isFirstRender) {
-      // Set up the function that will effectively force rerendering by
-      // incrementing a counter
-      let count = 1
-      this.forceRerenderFunc = () => {
-        // DebugEvent
-        if (LiveValueDebug.isLogging) {
-          LiveValueDebug.logDebug({
-            type: "RerenderingUseLiveValue",
-            useLiveValueName: this.name,
-          })
-        }
-        setCount(count++)
-      }
-
-      // Set up the name and value
-      this.initializeNameAndLiveValue(liveValueProp, nameProp)
-
+// Sets up useEffect to subscribe to the liveValue, then unsubscribe
+// on cleanup
+function useSubscribedLiveValue<T>(
+  liveValue: LiveValue<T>,
+  name: string,
+  setValue: (newVal: T) => void
+): void {
+  useEffect(() => {
+    const listener = () => {
       // DebugEvent
       if (LiveValueDebug.isLogging) {
         LiveValueDebug.logDebug({
-          type: "MountingUseLiveValue",
-          useLiveValueName: this.name,
+          type: "RerenderingUseLiveValue",
+          useLiveValueName: name,
         })
       }
-
-      this.connectToLiveValue()
-      this.isFirstRender = false
-    } else if (
-      this.latestLiveValueProp !== liveValueProp ||
-      this.latestNameProp !== nameProp
-    ) {
-      // Reset the name and value
-      this.disconnectFromLiveValue()
-      this.initializeNameAndLiveValue(liveValueProp, nameProp)
-      this.connectToLiveValue()
+      setValue(liveValue.value)
     }
-
-    // Remember the latest values passed in so we can determine if
-    // they've changed on the next render
-    this.latestLiveValueProp = liveValueProp
-    this.latestNameProp = nameProp
-
-    return this.liveValue.value
-  }
-
-  initializeNameAndLiveValue(
-    liveValueProp: LiveValueProp<T>,
-    nameProp: NameInit
-  ) {
-    this.name = nameInitToName(nameProp, "useLiveValue")
-
-    // Use the given LiveValue, or create a computed LiveValue if a
-    // function was passed in.
-    this.liveValue =
-      typeof liveValueProp === "function"
-        ? new LiveValue(liveValueProp, this.name)
-        : liveValueProp
-  }
-
-  // Removes any listeners from the current LiveValue
-  disconnectFromLiveValue() {
     // DebugEvent
-    if (LiveValueDebug.isLogging) {
+    LiveValueDebug.logDebug({
+      type: "ConnectingUseLiveValue",
+      useLiveValueName: name,
+      liveValueName: liveValue.name,
+      liveValue: liveValue,
+    })
+    setValue(liveValue.value)
+    liveValue.addListener(listener, name)
+    return () => {
+      // DebugEvent
       LiveValueDebug.logDebug({
         type: "DisconnectingUseLiveValue",
-        useLiveValueName: this.name,
-        liveValueName: this.liveValue.name,
-        liveValue: this.liveValue,
+        useLiveValueName: name,
+        liveValueName: liveValue.name,
+        liveValue: liveValue,
       })
+      liveValue.removeListener(listener)
     }
-    this.liveValue.disconnectDependencies()
-    this.liveValue.removeListener(this.forceRerenderFunc)
-  }
+  }, [liveValue, name, setValue])
+}
 
-  // Adds a listener to the current LiveValue
-  connectToLiveValue() {
-    // DebugEvent
-    if (LiveValueDebug.isLogging) {
+// Emit a debug event on initial mount
+function useDebugOnMount(name: string) {
+  const cval = 1
+  useEffect(() => {
+    LiveValueDebug.logDebug({
+      type: "MountingUseLiveValue",
+      useLiveValueName: name,
+    })
+  }, [cval, name])
+}
+
+// Emit a debug event on final unmount
+function useDebugOnUnmount(name: string) {
+  // Emit a debug event on unmount
+  useEffect(() => {
+    return () => {
       LiveValueDebug.logDebug({
-        type: "ConnectingUseLiveValue",
-        useLiveValueName: this.name,
-        liveValueName: this.liveValue.name,
-        liveValue: this.liveValue,
+        type: "UnmountingUseLiveValue",
+        useLiveValueName: name,
       })
     }
-    this.liveValue.addListener(this.forceRerenderFunc, this.name)
-  }
+
+    // We want the array to be empty so this is only called on
+    // unmount, even though we technically depend on name.  In
+    // practice, it's unlikely that name will change all that often.
+    
+    // eslint-disable-next-line
+  }, [])
 }
 
 export function useLiveValue<T>(
-  liveValue: LiveValueProp<T>,
-  name: NameInit = null
+  liveValue: LiveValue<T>,
+  nameProp: NameInit = null
 ): T {
-  // Construct a UseLiveValueState once, call onRender on it each time
-  const state = useState(() => new UseLiveValueState<T>())[0]
-  return state.onRender(liveValue, name)
+  const name = useLiveValueName(nameProp)
+
+  useDebugOnMount(name)
+  useDebugOnUnmount(name)
+
+  const [value, setValue] = useState(() => liveValue.value)
+  useSubscribedLiveValue(liveValue, name, setValue)
+
+  return value
 }

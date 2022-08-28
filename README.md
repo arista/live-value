@@ -25,24 +25,6 @@ function ShowCount(props: {
 
 When updating the `value` property, the usual React rules apply for registering the update: the actual value of the property must change, and if the value is an Object or Array, a different Object or Array identity must be assigned.
 
-A `LiveValue` may be constructed with a function argument, which may in turn reference the `value` property of other `LiveValue` objects.  In this case, the `LiveValue` will be updated if any of those "dependencies" changes value, and any `useLiveValue` hooks referencing that `LiveValue` will force their components to re-render.
-
-For example:
-
-```
-const counter1 = new LiveValue(0);
-setInterval(()=>counter1.value++, 1000);
-
-const counter2 = new LiveValue(0);
-setInterval(()=>counter2.value++, 700);
-
-const counterSum = new LiveValue(()=>counter1.value + counter2.value)
-```
-
-Here there are two `LiveValue` objects whose values are incrementing at varying rates, and a third `LiveValue` computes the sum of the two.  If the `counterSum` is passed to the `ShowCount` component above, that component will re-render whenever either of those counters changes value.
-
-When a function is passed to a `LiveValue`, that function is not evaluated until the first time the `value` property is accessed.  Its result is cached and returned with subsequent `value` calls until one of the dependencies changes, at which point that cached value is removed.  After that, the function is not re-evaluated until the next time `value` is accessed.
-
 ### Additional Notification API's
 
 `LiveValue` provides a simple API that allows applications to be notified when a value may have changed, either because the `value` was set directly, or because a dependency's value changed.  This effectively offers applications the same ability given to the `useLiveValue` hook:

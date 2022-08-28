@@ -42,7 +42,7 @@ class _DependencyTracker {
   }
 
   get currentDependent(): ComputedValue<any> | null {
-    return this.stack.length == 0 ? null : this.stack[this.stack.length - 1]
+    return this.stack.length === 0 ? null : this.stack[this.stack.length - 1]
   }
 }
 
